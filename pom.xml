@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>info.ejava.examples.build</groupId>
+        <artifactId>ejava-build-parent</artifactId>
+        <version>6.1.0-SNAPSHOT</version>
+        <relativePath>build/ejava-build-parent/pom.xml</relativePath>
+    </parent>
+    
+    <groupId>info.ejava.examples</groupId>
+    <artifactId>examples-root</artifactId>
+    <version>6.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>EJava 605.784</name>
+    <description>
+        This project provides the root for all example and exercise source code modules.
+    </description>
+    <modules>
+        <module>failsafe-it-example</module>
+        <module>failsafe-https-example</module>
+
+        <module>dockercompose-it-example</module>
+        <module>testcontainers-ntest-example</module>
+        <module>jpa-hibernate-example</module>
+        <module>jpa-hibernate-spring-example</module>
+    </modules>
+
+    <profiles>
+      <profile>
+          <id>docker</id>
+          <activation>
+            <file>
+              <exists>/var/run/docker.sock</exists>
+            </file>
+          </activation>
+          <modules>
+              <!-- Docker and IT with docker -->
+              <module>docker-hello-example</module>
+
+            <!-- for testing the API with DBs -->
+              <!-- Docker Compose and IT with docker compose -->
+              <module>dockercompose-it-example</module>
+
+              <!-- TestContainers -->
+              <!-- <module>testcontainers-ntest-example</module> -->
+
+              <!-- End-to-end flow with all the above -->
+              <!-- <module>dockercompose-votes-example</module> -->
+          </modules>
+      </profile>
+    </profiles>
+
+    
+    <dependencyManagement>
+        <dependencies>
+          <dependency>
+              <groupId>info.ejava.examples.build</groupId>
+              <artifactId>ejava-build-bom</artifactId>
+              <version>${project.version}</version>
+              <type>pom</type>
+              <scope>import</scope>
+          </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

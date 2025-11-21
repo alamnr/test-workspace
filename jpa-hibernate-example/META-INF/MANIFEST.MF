@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.3.0
+Build-Jdk-Spec: 17
+Class-Path: hibernate-core-6.5.2.Final.jar jakarta.transaction-api-2.0.1
+ .jar jboss-logging-3.6.1.Final.jar hibernate-commons-annotations-6.0.6.
+ Final.jar jandex-3.1.2.jar classmate-1.7.0.jar byte-buddy-1.15.10.jar j
+ akarta.xml.bind-api-4.0.2.jar jakarta.activation-api-2.1.3.jar jaxb-run
+ time-4.0.5.jar jaxb-core-4.0.5.jar angus-activation-2.0.2.jar txw2-4.0.
+ 5.jar istack-commons-runtime-4.1.2.jar jakarta.inject-api-2.0.1.jar ant
+ lr4-runtime-4.13.0.jar h2-2.2.224.jar jakarta.persistence-api-3.1.0.jar
+  slf4j-simple-2.0.9.jar slf4j-api-2.0.16.jar
+Main-Class: com.jpa.hibernate.Main
+

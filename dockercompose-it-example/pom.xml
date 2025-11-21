@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+     <parent>
+        <groupId>info.ejava.examples</groupId>
+        <artifactId>examples-root</artifactId>
+        <version>6.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>dockercompose-it-example</artifactId>
+    <name>Services::Container::Docker Compose: IT Example</name>
+    <description>
+        This project provides a demonstration of implementing a 
+        heavyweight integration setup with Docker Compose
+    </description>
+
+    <properties>
+        <!-- Turn off launch of unwrapped spring boot server during iintegration test; using Docker instead -->
+        <spring-boot.run.skip>true</spring-boot.run.skip>
+        <spring-boot.stop.skip>true</spring-boot.stop.skip>
+
+        <!-- uncomment to hard-code Docker Host port to specific port, otherwise random
+        <server.http.port>8080</server.http.port>
+        <port.postgres>5432</port.postgres>
+        -->
+        <server.http.port>8080</server.http.port>
+        <host.postgres.port>5432</host.postgres.port>
+        <host.mongodb.port>27017</host.mongodb.port>
+
+        <it.up.timeout.secs>90</it.up.timeout.secs>
+
+        <skipTests>${itOnly}</skipTests>
+        <skipITs>${!itOnly}</skipITs>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.ejava.examples.common</groupId>
+            <artifactId>ejava-web-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- For unit integration testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>application-containerdb.properties</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+                <excludes>
+                    <exclude>application-containerdb.properties</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin> <!-- builds a Spring Boot Executable JAR - potentially with layering -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <portNames combine.children="append">
+                                <portName>host.postgres.port</portName>
+                                <portName>host.mongodb.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.brachu</groupId>
+                <artifactId>docker-compose-maven-plugin</artifactId>
+                <configuration>
+                    <projectName>${project.artifactId}</projectName>
+                    <!-- all relative paths in docker-compose.yml file is eval against workDir -->
+                    <workDir>${project.basedir}/src/main/docker</workDir>
+                    <file>${project.basedir}/src/main/docker/docker-compose.yml</file>
+                    <skip>${skipITs}</skip>
+                    <env>
+                        <HOST_API_PORT>${server.http.port}</HOST_API_PORT>
+                        <HOST_POSTGRES_PORT>${host.postgres.port}</HOST_POSTGRES_PORT>
+                        <HOST_MONGODB_PORT>${host.mongodb.port}</HOST_MONGODB_PORT>
+                    </env>
+                    <wait>
+                        <value>${it.up.timeout.secs}</value>
+                        <unit>SECONDS</unit>
+                    </wait>
+                    <forceBuild>true</forceBuild>
+                    <removeOrphans>true</removeOrphans>
+                    
+                </configuration>
+                <executions>
+                <!-- Start Docker before integration tests -->
+                <execution>
+                    <id>docker-up</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                        <goal>up</goal>
+                    </goals>
+                </execution>
+
+                <!-- Stop Docker after integration tests -->
+                <execution>
+                    <id>docker-down</id>
+                    <phase>post-integration-test</phase>
+                    <goals>
+                        <goal>down</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <configuration> <!-- account for CD/CD environment when server will not be localhost -->
+                            <systemPropertyVariables combine.children="append">
+                                <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+    </build>
+
+</project>

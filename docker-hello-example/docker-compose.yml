@@ -1,0 +1,45 @@
+
+
+services:
+      
+# for Docker Desktop
+# https://www.testcontainers.org/supported_docker_environment/continuous_integration/dind_patterns/
+  environment:
+    - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+# necessary for Docker non-Desktop
+#https://medium.com/@TimvanBaarsen/how-to-connect-to-the-docker-host-from-inside-a-docker-container-112b4c71bc66
+  extra_hosts:
+    - host.docker.internal:host-gateway
+
+
+  mongo:
+   image: mongo:4.4.0-bionic
+   environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+   
+  postgres:
+    image: postgres:12.3-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.layered
+    image: docker-hello-example:layered
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      - mongo
+      - postgres
+    environment:
+      - spring.profiles.active=integration
+      - MONGODB_URI=mongodb://admin:secret@mongo:27017/votes_db?authSource=admin
+      - DATABASE_URL=postgres://postgres:secret@postgres:5432/postgres
+
+
+# add-host:
+#   environment:
+#     - TESTCONTAINERS_HOST_OVERRIDE=host.docker.internal
+#   extra_hosts:
+#     - host.docker.internal:host-gateway

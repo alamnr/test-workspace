@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:12.3-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+    ports: #only needed when IT tests are directly using DB
+      - "${HOST_POSTGRES_PORT:-5432}:5432"
+  mongodb:
+#    image: mongo:4.4.0-bionic
+# must use more modern version of mongodb to support MongoHealthIndicator
+#https://github.com/spring-projects/spring-boot/issues/41101
+#    image: mongo:4.4.28
+    image: mongo:4.4.0-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports: #only needed when IT tests are directly using DB
+      - "${HOST_MONGODB_PORT:-27017}:27017"
+  api:
+    build: 
+      #context is root directory for all Dockerfile relative references
+      context: ../../..
+      dockerfile: src/main/docker/Dockerfile
+    image: dockercompose-hello-example:latest
+    ports:
+      - "${HOST_API_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+      - mongodb
+    environment:
+      - DATABASE_URL=postgres://postgres:secret@postgres:5432/postgres
+      - MONGODB_URI=mongodb://admin:secret@mongodb:27017/test?authSource=admin
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+      start_period: 10s
+
+  # mvn:
+  #   image: maven:3.9-eclipse-temurin-17
+  #   working_dir: /app
+  #   volumes:
+  #     - ../../..:/app
+  #   depends_on:
+  #     - api
+  #   command: ["mvn", "clean", "verify"]

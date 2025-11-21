@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:users
+    username: sa
+    
+  hikari:
+    maximum-pool-size: 20
+jpa:
+  properties:
+    hibernate:
+      ddl-auto: validate
+      format_sql: false
+      jdbc:
+        batch_size: 50
+      order_inserts: true
+      order_updates: true
+      batch_versioned_data: true
+      show-sql: false
+      open-in-view: false # Recommended: disable to avoid lazy-loading in web layer
+
+
+# Hibernate-specific tuning
+# spring.jpa.properties.hibernate.jdbc.batch_size=50
+# spring.jpa.properties.hibernate.order_inserts=true
+# spring.jpa.properties.hibernate.order_updates=true
+
+
+# Spring transaction timeouts and threadpool configs are set where appropriate

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>info.ejava.examples</groupId>
+        <artifactId>examples-root</artifactId>
+        <version>6.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>docker-hello-example</artifactId>
+    <name>Services::Container::Docker Hello Example</name>
+
+    <description>
+        The project provides a demonstartion of implementing a simple docker image
+    </description>
+
+    <properties>
+        <layered>false</layered>
+        <docker.imageTag>execjar</docker.imageTag>
+
+        <!-- turn off launch of unwrapped Spring boot server during integration test; using Docker instead  -->
+        <spring-boot.run.skip>true</spring-boot.run.skip>
+        <spring-boot.stop.skip>true</spring-boot.stop.skip>
+
+        <!-- uncomment to hard-code Docker Host port to specific port, otherwise random
+        <server.http.port>8080</server.http.port>
+        -->
+
+
+        <!-- configure the fabric8:docker plugin using properties -->
+        <my.docker.verbose>true</my.docker.verbose>
+        <my.docker.dockerFile>${basedir}/Dockerfile.${docker.imageTag}</my.docker.dockerFile>
+        <my.docker.name>${project.artifactId}:${docker.imageTag}</my.docker.name>
+        <my.docker.ports.api.port>${server.http.port}:8080</my.docker.ports.api.port>
+
+        <!-- not needed here . Needed in IT test Docker image 
+            <my.docker.extraHosts.hosts.host.docker.internal>host.docker.internal:host-gateway</my.docker.extraHosts.hosts.host.docker.internal>
+         -->
+
+        <my.docker.wait.url>http://${ejava-parent.docker.hostname}:${server.http.port}/api/hello?name=jim</my.docker.wait.url>
+
+        <!-- docker.imageTag (2 values: execjar and layered) helps reference specific Dockerfile -->
+        <!-- ejava-parent.docker.hostname Maven property definition will be shown later in this lecture. You
+             can just think localhost for now.
+        -->
+        <!-- localhost outside of Docker CI/CD -->
+         <!-- <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname> -->
+    </properties>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>info.ejava.examples.common</groupId>
+            <artifactId>ejava-web-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- used for remote debugging
+                    <excludeDevtools>false</excludeDevtools>
+                    -->
+                    <layers>
+                        <enabled>${layered}</enabled>
+                    </layers>
+
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <dockerHost>tcp://localhost:2375</dockerHost>
+                    <containerNamePattern>%n-%t</containerNamePattern>
+
+                    <images>
+                        <!-- docker-maven-plugin 0.44.0 does not support <alias> use <name> instead -->
+                        <!-- <alias>${project.artifactId}</alias> -->
+                        
+                        <image>
+                            <name>${project.artifactId}</name>
+                            <external>
+                                <type>properties</type>
+                                <prefix>my.docker</prefix>
+                                <mode>override</mode>
+                            </external>
+                             <run>
+                                <wait>
+                                    <!-- <http>
+                                        <url>http://${ejava-parent.docker.hostname}:${server.http.port}/actuator/health</url>
+                                    </http> -->
+                                    <url>${my.docker.wait.url}</url>
+                                    <time>60000</time>
+                                </wait>
+                            </run>
+
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>start-container</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-container</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <configuration>
+                            <!-- account for CD/CD environment when server will not be localhost -->
+                            <!-- <systemPropertyVariables combine.children="append">
+                                    <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
+                            </systemPropertyVariables> -->
+                            <systemPropertyVariables >
+                                    <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
+                                    <it.server.port>${server.http.port}</it.server.port>
+                            </systemPropertyVariables> 
+                        </configuration>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+     <profiles>
+        <profile>
+            <id>layered</id>
+            <activation>
+                <property>
+                    <name>layered</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <layered>true</layered>
+                <docker.imageTag>layered</docker.imageTag>
+            </properties>
+        </profile>
+
+             <!--
+            The following is used to derive the hostname of where Docker images are running
+            that were launched by the tests.
+
+            Builds performed within the native environment with a local Dockerhost, will use
+            localhost or the value of the expanded ${docker.host.address} provided by
+            fabric8io:docker-maven-plugin.
+
+            CI/CD builds run within Docker and we must use a wormhole technique. This involes
+            mapping a hostname (host.docker.internal) to the magic "host-gateway" address in the
+            launch of the Docker image. This is in place by the root-level docker-compose.yml file.
+
+            We are making use of the TESTCONTAINERS_HOST_OVERRIDE environment variable to
+            know we are running within Docker and must use the wormhole technique.
+        -->
+        <profile> <!-- build is running within Docker-based CI/CD via root level docker-compose.yml -->
+            <id>wormhole-build</id>
+            <activation>
+                <property>
+                    <name>env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties> <!-- this hostname is mapped to "host-gateway", used by testcontainers, but generically usable -->
+                <ejava-parent.docker.hostname>${env.TESTCONTAINERS_HOST_OVERRIDE}</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+        <profile> <!-- build is running outside of Docker/root-level docker-compose.yml -->
+            <id>native-build</id>
+            <activation>
+                <property>
+                    <name>!env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties> <!-- localhost outside of Docker CI/CD -->
+                <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+
+
+    </profiles>
+
+
+
+</project>
