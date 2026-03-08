@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+ 
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>info.ejava.examples</groupId>
+        <artifactId>examples-root</artifactId>
+        <version>6.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>authn-config-example</artifactId>
+    <name>Services::Security::Authn Configuration Example</name>
+    <description>The project provides a demonstration of configuring security</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>    
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>info.ejava.examples.common</groupId>
+            <artifactId>ejava-web-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>  <!--   global configuration applies to all executions -->
+                    <attach>${spring-boot.attach}</attach> <!--  Executable JAR will not be installed or deployed in any Maven local or remote repository when false -->
+                    <classifier>${spring-boot.classifier}</classifier> <!--  Executable JAR will get a unique suffix identified by classifier i.e. "bootexec"-->
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>build-app</id>
+                        <phase>package</phase>
+                        <goals>   <!--  spring-boot-maven-plugin:repackage goal executed during the Maven package phase with global configuration -->
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                         <id>pre-integration-test</id> <!-- each execution must have a unique ID when there is more than one -->
+                        <phase>pre-integration-test</phase>  <!-- this execution will be tied to the pre-integration-test phase -->
+                        <goals>
+                            <goal>start</goal> <!-- this execution will start the server in the background -->
+                        </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip> <!--     -DskipITs=true will deactivate this execution -->
+                            <arguments>  <!-- -server.port is being assigned at runtime and used by server for HTTP listen port -->
+                               <argument>--server.port=${server.http.port}</argument>
+                            </arguments>
+                        </configuration>
+
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id> <!-- each execution must have a unique ID-->
+                        <phase>post-integration-test</phase>  <!--  this execution will be tied to the post-integration-test phase -->
+                        <goals>
+                            <goal>stop</goal>   <!--   this execution will stop the running server  -->
+                        </goals>
+                        <configuration>
+                            <skip>${skipITs}</skip>  <!--  -DskipITs=true will deactivate this execution -->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- At this point the Spring Boot Maven Plugin is ready to do what we need as long as we define the Maven server.http.port property value to use. We can define that statically with a Maven pom.xml property, a -Dserver.http.port= #### on the Maven command line, or dynamically with the Maven Build Helper Plugin. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <phase>process-resources</phase> <!-- execute during the process-resources Maven phase — which is well before pre-integration-test -->
+                        <goals>
+                            <goal>reserve-network-port</goal> <!--  execute the reserve-network-port goal of the plugin -->
+                        </goals>
+                        <configuration>
+                            <portNames> <!-- assigned the identified port to the Maven server.http.port property -->
+                                <portName>server.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>  <!-- activate integration-test goal — automatically binds to integration-test phase -->
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>   <!--  add a -Dit.server.port=${server.http.port} system property to the execution -->
+                                <it.server.port>${server.http.port}</it.server.port>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <!--  verify Goal Must Be Declared to Report Pass/Fail to Maven Build
+                            If the verify goal is not wired into the declaration — the setup, tests, and tear down will occur, 
+                            but the build will not evaluate and report the results to Maven. The integration tests will appear to always 
+                            pass even if you see test errors reported in the integration-test output. -->
+                        <goals> 
+                            <goal>verify</goal> <!--  activate verify goal — automatically binds to verify phase -->
+
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

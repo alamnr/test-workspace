@@ -3,7 +3,7 @@
 
     <groupId>info.ejava.examples.build</groupId>
     <artifactId>ejava-build-bom</artifactId>
-    <version>6.1.0-SNAPSHOT</version>
+    <version>6.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>EJava Build::BOM</name>
@@ -13,12 +13,13 @@
     </description>
 
     <properties>
-        <springboot.version>3.4.0</springboot.version>
+        <springboot.version>3.5.5</springboot.version>
 
         <!-- additional libraries -->
         <datafaker.version>2.0.1</datafaker.version>
         <commons-text.version>1.10.0</commons-text.version>
-        <flapdoodle.spring30x.version>4.11.0</flapdoodle.spring30x.version>
+        <flapdoodle.spring3x.version>4.21.0</flapdoodle.spring3x.version>
+        <flapdoodle.mongo.version>4.21.0</flapdoodle.mongo.version>
         <gson-fire.version>1.7.1</gson-fire.version>
         <google-code-findbugs-jsr305.version>3.0.2</google-code-findbugs-jsr305.version>
         <hamcrest-date.version>2.0.8</hamcrest-date.version>
@@ -26,17 +27,16 @@
         <jjwt.version>0.11.2</jjwt.version>
         <okhttp.version>4.12.0</okhttp.version>
         <spock.version>2.4-M1-groovy-4.0</spock.version>
-        <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
-        <!-- <springdoc-openapi.version>2.7.0</springdoc-openapi.version> -->
+        <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
         <sslcontext-kickstart.version>7.4.9</sslcontext-kickstart.version>
 
         <!-- used for build/deploy of this specific artifact -->
-        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-dependency-plugin.version>3.7.1</maven-dependency-plugin.version>
-        <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
-        <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
+        <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
+        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
+        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
         <maven-release-plugin.version>3.12.1</maven-release-plugin.version>
-        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
+        <maven-site-plugin.version>4.0.0-M16</maven-site-plugin.version>
         <wagon-ssh.version>3.5.3</wagon-ssh.version>
     </properties>
 
@@ -72,8 +72,13 @@
             </dependency>
             <dependency>
                 <groupId>de.flapdoodle.embed</groupId>
-                <artifactId>de.flapdoodle.embed.mongo.spring30x</artifactId>
-                <version>${flapdoodle.spring30x.version}</version>
+                <artifactId>de.flapdoodle.embed.mongo.spring3x</artifactId>
+                <version>${flapdoodle.spring3x.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.flapdoodle.embed</groupId>
+                <artifactId>de.flapdoodle.embed.mongo</artifactId>
+                <version>${flapdoodle.mongo.version}</version>
             </dependency>
 
             <!-- for hamcrest date comparisons -->
@@ -200,13 +205,6 @@
                       <skip>true</skip>
                       <skipDeploy>true</skipDeploy>
                   </configuration>
-                  <dependencies>
-                      <dependency>
-                          <groupId>org.apache.maven.wagon</groupId>
-                          <artifactId>wagon-ssh</artifactId>
-                          <version>${wagon-ssh.version}</version>
-                      </dependency>
-                  </dependencies>
               </plugin>
               <plugin>
                   <groupId>org.apache.maven.plugins</groupId>
@@ -217,9 +215,14 @@
         </pluginManagement>
     </build>
 
-    <profiles>
-    
-    </profiles>
-
-    
+    <distributionManagement>
+        <repository>
+            <id>ejava.release.repo</id>
+            <url>${repo.release.deploy.url}</url>
+        </repository>
+        <snapshotRepository>
+            <id>ejava.snapshot.repo</id>
+            <url>${repo.snapshot.deploy.url}</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
