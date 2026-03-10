@@ -39,6 +39,17 @@
             <artifactId>ejava-web-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <!-- needed to set up TLS for RestTemplate -->
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.hakky54</groupId>
+            <artifactId>sslcontext-kickstart-for-apache5</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -57,9 +68,39 @@
         </dependency>
 
     </dependencies>
+    <!-- <profiles>
+     <profile>
+            <id>it</id>
+            <activation>
+                <file>
+                    <exists>${basedir}/src/test/resources/application-itHttps.properties</exists>
+                </file>
+            </activation>
+            <properties>
+                
+            </properties>  -->
 
     <build>
         <plugins>
+             <!-- At this point the Spring Boot Maven Plugin is ready to do what we need as long as we define the Maven server.http.port property value to use. We can define that statically with a Maven pom.xml property, a -Dserver.http.port= #### on the Maven command line, or dynamically with the Maven Build Helper Plugin. -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <phase>process-resources</phase> <!-- execute during the process-resources Maven phase — which is well before pre-integration-test -->
+                        <goals>
+                            <goal>reserve-network-port</goal> <!--  execute the reserve-network-port goal of the plugin -->
+                        </goals>
+                        <configuration>
+                            <portNames> <!-- assigned the identified port to the Maven server.http.port property -->
+                                <portName>server.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -86,6 +127,8 @@
                             <arguments>  <!-- -server.port is being assigned at runtime and used by server for HTTP listen port -->
                                <argument>--server.port=${server.http.port}</argument>
                             </arguments>
+                            <!-- comment the profiles for successful http MVN IT test -->
+                             <!-- <profiles>https</profiles> -->
                         </configuration>
 
                     </execution>
@@ -101,25 +144,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- At this point the Spring Boot Maven Plugin is ready to do what we need as long as we define the Maven server.http.port property value to use. We can define that statically with a Maven pom.xml property, a -Dserver.http.port= #### on the Maven command line, or dynamically with the Maven Build Helper Plugin. -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>reserve-network-port</id>
-                        <phase>process-resources</phase> <!-- execute during the process-resources Maven phase — which is well before pre-integration-test -->
-                        <goals>
-                            <goal>reserve-network-port</goal> <!--  execute the reserve-network-port goal of the plugin -->
-                        </goals>
-                        <configuration>
-                            <portNames> <!-- assigned the identified port to the Maven server.http.port property -->
-                                <portName>server.http.port</portName>
-                            </portNames>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+           
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -150,4 +175,7 @@
             </plugin>
         </plugins>
     </build>
+   <!-- </profile>
+</profiles>  -->
+    
 </project>

@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -20,6 +21,7 @@ import info.ejava.examples.common.web.ServerConfig;
 @SpringBootTest(classes = ClientTestConfigurationSureFire.class,
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "test=true" )
+@ActiveProfiles("ntest")
 public class AuthnRestTemplateNTest {
 
     @Autowired

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @SpringBootTest(classes = ClientConfigurationFailSafe.class, 
                 webEnvironment = SpringBootTest.WebEnvironment.NONE ) 
+@ActiveProfiles("it")
 @Slf4j
 public class FailsafeRestTemplateIT {
 

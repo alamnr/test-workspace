@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -19,7 +20,8 @@ import info.ejava.examples.common.web.ServerConfig;
 * A test configuration used by remote IT test client
 */
 
-@TestConfiguration 
+@TestConfiguration (proxyBeanMethods = false)
+@Profile("ntest")
 public class ClientTestConfigurationSureFire {
     
     // @Bean
