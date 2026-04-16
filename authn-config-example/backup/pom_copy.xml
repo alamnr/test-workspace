@@ -95,14 +95,17 @@
 
     <build>
         <plugins>
-             <!-- At this point the Spring Boot Maven Plugin is ready to do what we need as long as we define the Maven server.http.port property value to use. We can define that statically with a Maven pom.xml property, a -Dserver.http.port= #### on the Maven command line, or dynamically with the Maven Build Helper Plugin. -->
+             <!-- At this point the Spring Boot Maven Plugin is ready to do what we need as long as we define 
+             the Maven server.http.port property value to use. We can define that statically with a Maven pom.xml
+             property, a -Dserver.http.port= #### on the Maven command line, or dynamically with the Maven Build Helper Plugin. -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>reserve-network-port</id>
-                        <phase>process-resources</phase> <!-- execute during the process-resources Maven phase — which is well before pre-integration-test -->
+                        <!-- execute during the process-resources Maven phase — which is well before pre-integration-test -->
+                        <phase>process-resources</phase> 
                         <goals>
                             <goal>reserve-network-port</goal> <!--  execute the reserve-network-port goal of the plugin -->
                         </goals>
@@ -118,8 +121,10 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>  <!--   global configuration applies to all executions -->
-                    <attach>${spring-boot.attach}</attach> <!--  Executable JAR will not be installed or deployed in any Maven local or remote repository when false -->
-                    <classifier>${spring-boot.classifier}</classifier> <!--  Executable JAR will get a unique suffix identified by classifier i.e. "bootexec"-->
+                <!--  Executable JAR will not be installed or deployed in any Maven local or remote repository when false -->
+                    <attach>${spring-boot.attach}</attach> 
+                     <!--  Executable JAR will get a unique suffix identified by classifier i.e. "bootexec"-->
+                    <classifier>${spring-boot.classifier}</classifier>
                     <!--  <layers>
                         <enabled>${layered}</enabled>
                     </layers> -->
@@ -128,11 +133,42 @@
                     <execution>
                         <id>build-app</id>
                         <phase>package</phase>
-                        <goals>   <!--  spring-boot-maven-plugin:repackage goal executed during the Maven package phase with global configuration -->
+                        <goals>   
+                        <!--  spring-boot-maven-plugin:repackage goal executed during the Maven package phase with global configuration -->
                             <goal>repackage</goal>
                         </goals>
                     </execution>
-                    
+                    <execution>
+                         <id>pre-integration-test</id> <!-- each execution must have a unique ID when there is more than one -->
+                        <phase>pre-integration-test</phase>  <!-- this execution will be tied to the pre-integration-test phase -->
+                        <goals>
+                            <goal>start</goal> <!-- this execution will start the server in the background -->
+                        </goals>
+                        <configuration>
+                        <!--     -DskipITs=true will deactivate this execution -->
+                            <!-- <skip>${skipITs}</skip> -->
+                            <skip>${skipBootRun}</skip>
+                             
+                            <arguments>  <!-- -server.port is being assigned at runtime and used by server for HTTP listen port -->
+                               <argument>--server.port=${server.http.port}</argument>
+                            </arguments>
+                            <!-- comment the profiles for successful http MVN IT test -->
+                             <!-- <profiles>https</profiles> -->
+                        </configuration>
+
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id> <!-- each execution must have a unique ID-->
+                        <phase>post-integration-test</phase>  <!--  this execution will be tied to the post-integration-test phase -->
+                        <goals>
+                            <goal>stop</goal>   <!--   this execution will stop the running server  -->
+                        </goals>
+                        <configuration>
+                             <!--  -DskipITs=true will deactivate this execution -->
+                            <!-- <skip>${skipITs}</skip>  -->
+                            <skip>${skipBootRun}</skip>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
            
@@ -181,15 +217,6 @@
                                 <prefix>my.docker</prefix>
                                 <mode>override</mode>
                             </external>
-                            <run>
-                                <wait>
-                                    <!-- <http>
-                                        <url>http://${ejava-parent.docker.hostname}:${server.http.port}/actuator/health</url>
-                                    </http> -->
-                                    <url>${my.docker.wait.url}</url>
-                                    <time>60000</time>
-                                </wait>
-                            </run>
                         </image>
                     </images>
                 </configuration>
@@ -227,16 +254,8 @@
                 </file>
             </activation> -->
             <id>no-boot-run</id>
-            <activation>
-                <property>
-                    <name>!env.TESTCONTAINERS_HOST_OVERRIDE</name>
-                </property>
-            </activation>
-            
             <properties>
                 <skipBootRun>true</skipBootRun>
-                <!-- localhost outside of Docker CI/CD -->
-                <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname>
             </properties>
         </profile>
     </profiles> 

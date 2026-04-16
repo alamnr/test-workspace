@@ -13,6 +13,7 @@
     <description>This project provides a demonstration of using a failsafe integration test. </description>
 
     
+    
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -51,6 +52,8 @@
         </dependency>
 
     </dependencies>
+   
+   
     <build>
         <plugins>
             <!-- assigns a random port# to property server.http.port -->
@@ -60,10 +63,11 @@
                 <executions>
                     <execution>
                         <id>reserve-network-port</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>reserve-network-port</goal>
                         </goals>
-                        <phase>process-resources</phase>
+                        
                         <configuration>
                             <portNames>
                                 <portName>server.http.port</portName>
@@ -80,6 +84,7 @@
                 <executions>
                     <execution>
                         <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
                         <goals>
                             <goal>start</goal>
                         </goals>
@@ -92,6 +97,7 @@
                     </execution>
                     <execution>
                         <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
                         <goals>
                             <goal>stop</goal>
                         </goals>

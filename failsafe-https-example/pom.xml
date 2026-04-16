@@ -71,7 +71,7 @@
             <id>it</id>
             <activation>
                 <file>
-                    <exists>>${basedir}/src/test/resources/applicationit.properties</exists>
+                    <exists>${basedir}/src/test/resources/application-it.properties</exists>
                 </file>
             </activation>
             <properties>
@@ -86,10 +86,11 @@
                         <executions>
                             <execution>
                                 <id>reserve-network-port</id>
+                                <phase>process-resources</phase>
                                 <goals>
                                     <goal>reserve-network-port</goal>
                                 </goals>
-                                <phase>process-resources</phase>
+                                
                                 <configuration>
                                     <portNames>
                                         <portName>server.http.port</portName>

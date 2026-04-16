@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- <parent>
+        <groupId>info.ejava.examples</groupId>
+        <artifactId>examples-root</artifactId>
+        <version>6.1.0-SNAPSHOT</version>
+    </parent> -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.5</version>
+    </parent>
+    <groupId>info.ejava.examples.svc.docker.hello</groupId>
+    <artifactId>docker-hello</artifactId>
+    <version>${ejava.version}</version>
+
+    <name>Services::Container::Docker Hello Example</name>
+    <description>
+        This project provides a demonstration of implementing a
+        simple Docker image.
+    </description>
+
+
+
+    <properties>
+
+        <ejava.version>6.1.0-SNAPSHOT</ejava.version>
+        <springboot.version>3.5.5</springboot.version>
+        <maven.min.version>3.6.3</maven.min.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java.target.version>21</java.target.version>
+         
+        <!--  Executable JAR will not be installed or deployed in any Maven local or remote repository when false -->
+        <spring-boot.attach>false</spring-boot.attach>
+         <!--  Executable JAR will get a unique suffix identified by classifier i.e. "bootexec"-->
+        <spring-boot.classifier>bootexec</spring-boot.classifier>
+
+        <!-- <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname> -->
+
+        <!-- docker -->
+        <layered>true</layered>
+        <docker.imageTag>execjar</docker.imageTag>
+
+        <!-- turn off launch of unwrapped Spring Boot server durign integration-test; using Docker instead -->
+        <spring-boot.run.skip>true</spring-boot.run.skip>
+        <spring-boot.stop.skip>true</spring-boot.stop.skip>
+
+        <!-- configure the fabric8:docker plugin using properties-->
+        <my.docker.verbose>true</my.docker.verbose>
+        <my.docker.dockerFile>${basedir}/Dockerfile.${docker.imageTag}</my.docker.dockerFile>
+        <my.docker.name>${project.artifactId}:${docker.imageTag}</my.docker.name>
+        <my.docker.ports.api.port>${server.http.port}:8080</my.docker.ports.api.port>
+        <my.docker.wait.url>http://${ejava-parent.docker.hostname}:${server.http.port}/api/hello?name=jim</my.docker.wait.url>
+    </properties>
+
+    <dependencies> 
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>            
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>            
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>            
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>            
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>            
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>info.ejava.examples.common</groupId>
+            <artifactId>ejava-web-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+    </dependencies>
+   
+
+    <build>
+        <plugins>
+             
+                 <!-- assigns a random port# to property server.http.port -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-network-port</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <configuration>
+                            <portNames>
+                                <portName>server.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+                     <!-- adds pre-integration and post-integration configuration -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>           
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                        <attach>${spring-boot.attach}</attach>
+                        <classifier>${spring-boot.classifier}</classifier>
+                        <layers>
+                            <enabled>${layered}</enabled>
+                        </layers>
+                </configuration>
+                
+                
+                <executions>
+                    <execution>
+                        <id>build-app</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${spring-boot.run.skip}</skip>
+                            <arguments>
+                                <argument>--server.port=${server.http.port}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${spring-boot.stop.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <configuration>
+                    <containerNamePattern>%a-%t</containerNamePattern>
+                    <images>
+                        <image>
+                            <alias>${project.artifactId}</alias>
+                            <external>
+                                <type>properties</type>
+                                <prefix>my.docker</prefix>
+                                <mode>override</mode>
+                            </external>
+                            <run>
+                                <wait>
+                                    <http>
+                                        <url>http://${ejava-parent.docker.hostname}:${server.http.port}/actuator/health</url>
+                                    </http>
+                                    <time>20000</time>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                 <executions>
+                    <execution>
+                        <id>build-image</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>start-container</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop-container</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+            </plugin> 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- <id>integration-test</id> -->
+                        <configuration> 
+                        
+                        <!-- account for CD/CD environment when server will not be localhost -->
+                                <!-- combine.children="append"  - add child values to parent provided value 
+                                     combine.self="override" - replace parent provided values with child values -->
+                            <!-- <systemPropertyVariables combine.children="append"> -->
+                            <systemPropertyVariables>
+                                <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
+                                <it.server.port>${server.http.port}</it.server.port>
+                            </systemPropertyVariables>
+                        </configuration>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <!-- <execution>
+                        <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                    </execution> -->
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+        <!-- build is running within Docker based CI/CD via root level docker-compose.yml-->
+            <id>wormhole-build</id>
+            <activation>
+                <property>
+                    <name>env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- this hostname is mapped to "host-gateway", used by testcontainers, but generically usable -->
+                <ejava-parent.docker.hostname>${env.TESTCONTAINERS_HOST_OVERRIDE}</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+        <profile>
+            <!-- build is running outside of Docker/root-level docker-compose.yml -->
+            <id>native-build</id>
+            <activation>
+                <property>
+                    <name>!env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- localhost outside of Docker CI/CD -->
+                <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+    </profiles>
+</project>

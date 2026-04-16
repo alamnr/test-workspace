@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: secret
+    ports: # Only needed when IT tests are directly using DB
+      - "${HOST_POSTGRES_PORT:-5432}:5432"
+
+  mongodb:
+    image: mongo:latest
+    environment: 
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+    ports: # only needed when IT tests are directly using DB
+      - "${HOST_MONGO_PORT:-27017}:27017"
+      
+      

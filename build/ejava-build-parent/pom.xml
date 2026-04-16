@@ -547,6 +547,12 @@
         </profile>
 
         <!--
+
+
+
+
+
+        
             This profile will turn off spring-boot-maven-plugin start/stop of the Spring Boot
             executable JAR and will enable basic settings to build, start, and stop a single
             image defined be a specific Dockerfile as part of a Maven integration test.

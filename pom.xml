@@ -22,6 +22,7 @@
         <module>failsafe-https-example</module>
 
         <module>dockercompose-it-example</module>
+        <module>dockercompose-it</module>
         <module>testcontainers-ntest-example</module>
         <module>jpa-hibernate-example</module>
         <module>jpa-hibernate-spring-example</module>
