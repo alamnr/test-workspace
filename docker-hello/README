@@ -1,0 +1,20 @@
+# The project provides a demonstartion of implementing a simple docker integration test
+There are 2 pom files we have used - 
+1. "pom-self.xml"  is used as standalone and 
+2. "pom-parent.cml" is inheriting from ots ejava-build-parent pom.xml file
+
+We have modofied the pom-parent.xml as required to accomplish the goal. The original file in the 
+Gitlab repository was not enough to accomplish all the task describe un the chapter Docker Integration test
+
+Make the test in the CI/CD environment you need to add the environment variable from windows powershell as follows - 
+
+Set the value: Use the $env: prefix with the assignment operator.
+
+$env:TESTCONTAINERS_HOST_OVERRIDE = "host.docker.internal"
+
+Show the value: Simply type the variable name to display it in the console.
+
+$env:TESTCONTAINERS_HOST_OVERRIDE
+
+[Search Link] {https://www.google.com/search?q=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&sca_esv=b81e1b9584c528ab&biw=1358&bih=610&sxsrf=ANbL-n5VgTiHiQ9c4RU5gETkReHj-OR6GQ%3A1776406121479&ei=ac7haZfnHJ2V4-EP3t2-qAE&ved=0ahUKEwjXv-O-nPSTAxWdyjgGHd6uDxUQ4dUDCBE&uact=5&oq=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&gs_lp=Egxnd3Mtd2l6LXNlcnAiWkkgd2FudCB0byBzZXQgYW5kIHNob3cgdmFsdWUgb2YgaG9zdC5kb2NrZXIuaW50ZXJuYWwgdG8gJGVudjpURVNUQ09OVEFJTkVSU19IT1NUX09WRVJSSURFPUgAUABYAHAAeAGQAQCYAQCgAQCqAQC4AQPIAQD4AQGYAgCgAgCYAwCSBwCgBwCyBwC4BwDCBwDIBwCACAA&sclient=gws-wiz-serp}
+ 

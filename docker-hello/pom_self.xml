@@ -1,86 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
-    <parent>
+    <!-- <parent>
         <groupId>info.ejava.examples</groupId>
         <artifactId>examples-root</artifactId>
         <version>6.1.0-SNAPSHOT</version>
+    </parent> -->
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.5</version>
     </parent>
-
+    <groupId>info.ejava.examples.svc.docker.hello</groupId>
     <artifactId>docker-hello</artifactId>
-    <name>Services::Container::Docker Hello Example</name>
+    <version>${ejava.version}</version>
 
+    <name>Services::Container::Docker Hello Example</name>
     <description>
-        The project provides a demonstartion of implementing a simple docker image
+        This project provides a demonstration of implementing a
+        simple Docker image.
     </description>
 
+
+
     <properties>
-        <layered>false</layered>
+
+        <ejava.version>6.1.0-SNAPSHOT</ejava.version>
+        <springboot.version>3.5.5</springboot.version>
+        <maven.min.version>3.6.3</maven.min.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <java.target.version>21</java.target.version>
+         
+        <!--  Executable JAR will not be installed or deployed in any Maven local or remote repository when false -->
+        <spring-boot.attach>false</spring-boot.attach>
+         <!--  Executable JAR will get a unique suffix identified by classifier i.e. "bootexec"-->
+        <spring-boot.classifier>bootexec</spring-boot.classifier>
+
+        <!-- <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname> -->
+
+        <!-- docker -->
+        <layered>true</layered>
         <docker.imageTag>execjar</docker.imageTag>
 
-        <!-- turn off launch of unwrapped Spring boot server during integration test; using Docker instead  -->
+        <!-- turn off launch of unwrapped Spring Boot server durign integration-test; using Docker instead -->
         <spring-boot.run.skip>true</spring-boot.run.skip>
         <spring-boot.stop.skip>true</spring-boot.stop.skip>
 
-        <!-- uncomment to hard-code Docker Host port to specific port, otherwise random
-        <server.http.port>8080</server.http.port>
-        -->
-
-
-        <!-- configure the fabric8:docker plugin using properties -->
+        <!-- configure the fabric8:docker plugin using properties-->
         <my.docker.verbose>true</my.docker.verbose>
         <my.docker.dockerFile>${basedir}/Dockerfile.${docker.imageTag}</my.docker.dockerFile>
         <my.docker.name>${project.artifactId}:${docker.imageTag}</my.docker.name>
         <my.docker.ports.api.port>${server.http.port}:8080</my.docker.ports.api.port>
-
-        <!-- not needed here . Needed in IT test Docker image 
-            <my.docker.extraHosts.hosts.host.docker.internal>host.docker.internal:host-gateway</my.docker.extraHosts.hosts.host.docker.internal>
-         -->
-
         <my.docker.wait.url>http://${ejava-parent.docker.hostname}:${server.http.port}/api/hello?name=jim</my.docker.wait.url>
-
-        <!-- docker.imageTag (2 values: execjar and layered) helps reference specific Dockerfile -->
-        <!-- ejava-parent.docker.hostname Maven property definition will be shown later in this lecture. You
-             can just think localhost for now.
-        -->
-        <!-- localhost outside of Docker CI/CD -->
-         <!-- <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname> -->
     </properties>
 
-
-    <dependencies>
+    <dependencies> 
+        
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>info.ejava.examples.common</groupId>
-            <artifactId>ejava-web-util</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <artifactId>spring-boot-starter-web</artifactId>            
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-security</artifactId>            
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>            
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>            
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -89,11 +86,38 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>            
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>info.ejava.examples.common</groupId>
+            <artifactId>ejava-web-util</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
     </dependencies>
+   
 
     <build>
         <plugins>
-
+             
                  <!-- assigns a random port# to property server.http.port -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -113,52 +137,78 @@
                     </execution>
                 </executions>
             </plugin>
+                     <!-- adds pre-integration and post-integration configuration -->
             <plugin>
-                <groupId>org.springframework.boot</groupId>
+                <groupId>org.springframework.boot</groupId>           
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <!-- used for remote debugging
-                    <excludeDevtools>false</excludeDevtools>
-                    -->
-                    <layers>
-                        <enabled>${layered}</enabled>
-                    </layers>
-
+                        <attach>${spring-boot.attach}</attach>
+                        <classifier>${spring-boot.classifier}</classifier>
+                        <layers>
+                            <enabled>${layered}</enabled>
+                        </layers>
                 </configuration>
+                
+                
+                <executions>
+                    <execution>
+                        <id>build-app</id>
+                        <phase>package</phase>
+                        <goals>
+                          <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                
+                    <execution>
+                        <id>pre-integration-test</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${spring-boot.run.skip}</skip>
+                            <arguments>
+                                <argument>--server.port=${server.http.port}</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>post-integration-test</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${spring-boot.stop.skip}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-
             <plugin>
                 <groupId>io.fabric8</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
                 <configuration>
-                    <dockerHost>tcp://localhost:2375</dockerHost>
-                    <containerNamePattern>%n-%t</containerNamePattern>
-
+                    <containerNamePattern>%a-%t</containerNamePattern>
                     <images>
-                        <!-- docker-maven-plugin 0.44.0 does not support <alias> use <name> instead -->
-                        <!-- <alias>${project.artifactId}</alias> -->
-                        
                         <image>
-                            <name>${project.artifactId}</name>
+                            <alias>${project.artifactId}</alias>
                             <external>
                                 <type>properties</type>
                                 <prefix>my.docker</prefix>
                                 <mode>override</mode>
                             </external>
-                             <run>
+                            <run>
                                 <wait>
                                     <http>
                                         <url>http://${ejava-parent.docker.hostname}:${server.http.port}/actuator/health</url>
                                     </http>
                                     <time>20000</time>
                                 </wait>
-
                             </run>
-
                         </image>
                     </images>
                 </configuration>
-                <executions>
+                 <executions>
                     <execution>
                         <id>build-image</id>
                         <phase>package</phase>
@@ -179,55 +229,41 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
 
+            </plugin> 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
                 <executions>
                     <execution>
-                    <!-- Comment following id or same name of id so that child pom can override the parent pom 
-                     plugin execution-->
-                        <id>integration-test</id>
-                        <configuration>
-                            <!-- account for CD/CD environment when server will not be localhost -->
+                        <!-- <id>integration-test</id> -->
+                        <configuration> 
+                        
+                        <!-- account for CD/CD environment when server will not be localhost -->
                                 <!-- combine.children="append"  - add child values to parent provided value 
                                      combine.self="override" - replace parent provided values with child values -->
                             <!-- <systemPropertyVariables combine.children="append"> -->
-                            <systemPropertyVariables >
-                                    <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
-                                    <it.server.port>${server.http.port}</it.server.port>
-                            </systemPropertyVariables> 
+                            <systemPropertyVariables>
+                                <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
+                                <it.server.port>${server.http.port}</it.server.port>
+                            </systemPropertyVariables>
                         </configuration>
                         <goals>
                             <goal>integration-test</goal>
                         </goals>
                     </execution>
-                    <execution>
+                    <!-- <execution>
                         <id>verify</id>
                             <goals>
                                 <goal>verify</goal>
                             </goals>
-                    </execution> 
+                    </execution> -->
                 </executions>
             </plugin>
+
         </plugins>
     </build>
-
-     <profiles>
-        <profile>
-            <id>layered</id>
-            <activation>
-                <property>
-                    <name>layered</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <properties>
-                <layered>true</layered>
-                <docker.imageTag>layered</docker.imageTag>
-            </properties>
-        </profile> 
+    <profiles>
         <profile>
         <!-- build is running within Docker based CI/CD via root level docker-compose.yml-->
             <id>wormhole-build</id>
@@ -255,5 +291,4 @@
             </properties>
         </profile>
     </profiles>
-        
 </project>
