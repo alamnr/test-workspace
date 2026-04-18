@@ -1,17 +1,40 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:12.3-alpine
     environment:
       POSTGRES_PASSWORD: secret
-    ports: # Only needed when IT tests are directly using DB
+    ports: #only needed when IT tests are directly using DB
       - "${HOST_POSTGRES_PORT:-5432}:5432"
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
   mongodb:
-    image: mongo:latest
-    environment: 
+#    image: mongo:4.4.0-bionic
+# must use more modern version of mongodb to support MongoHealthIndicator
+#https://github.com/spring-projects/spring-boot/issues/41101
+#    image: mongo:4.4.28
+    image: mongo:4.4.0-bionic
+    environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: secret
-    ports: # only needed when IT tests are directly using DB
-      - "${HOST_MONGO_PORT:-27017}:27017"
-      
-      
+    ports: #only needed when IT tests are directly using DB
+      - "${HOST_MONGODB_PORT:-27017}:27017"
+  api:
+    build: 
+      #context is root directory for all Dockerfile relative references
+      context: ../../..
+      dockerfile: src/main/docker/Dockerfile
+    image: dockercompose-hello:latest
+    ports:
+      - "${HOST_API_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+          condition: service_healthy
+      mongodb:
+          condition: service_started
+    environment:
+      - DATABASE_URL=postgres://postgres:secret@postgres:5432/postgres
+      - MONGODB_URI=mongodb://admin:secret@mongodb:27017/test?authSource=admin

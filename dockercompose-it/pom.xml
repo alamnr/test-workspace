@@ -187,7 +187,7 @@
                         <configuration>
                             <composeFile>${project.basedir}/src/main/docker/docker-compose.yml</composeFile>
                             <detachedMode>true</detachedMode>
-                            <waitAfterUp>20</waitAfterUp> 
+                            <awaitTimeout>20</awaitTimeout>
                         </configuration>
                     </execution>
                     <execution>
