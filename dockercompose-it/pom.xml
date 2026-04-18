@@ -103,6 +103,7 @@
                 </excludes>
             </testResource>
         </testResources>
+
         <plugins>
             <plugin> <!-- builds a Spring Boot Executable JAR - potentially with layering -->
                 <groupId>org.springframework.boot</groupId>
@@ -126,6 +127,7 @@
                         <phase>process-resources</phase>
                         <configuration>
                             <portNames combine.children="append">
+                                <portName>server.http.port</portName>
                                 <portName>host.postgres.port</portName>
                                 <portName>host.mongodb.port</portName>
                             </portNames>
@@ -133,12 +135,12 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
+
+            <!-- <plugin>
                 <groupId>io.brachu</groupId>
                 <artifactId>docker-compose-maven-plugin</artifactId>
                 <configuration>
                     <projectName>${project.artifactId}</projectName>
-                    <!-- all relative paths in docker-compose.yml file is eval against workDir -->
                     <workDir>${project.basedir}/src/main/docker</workDir>
                     <file>${project.basedir}/src/main/docker/docker-compose.yml</file>
                     <skip>${skipITs}</skip>
@@ -153,28 +155,55 @@
                     </wait>
                     <forceBuild>true</forceBuild>
                     <removeOrphans>true</removeOrphans>
+
+                    <waitActive>false</waitActive>
                     
                 </configuration>
-                <executions>
-                <!-- Start Docker before integration tests -->
+
+            <executions>
                 <execution>
-                    <id>docker-up</id>
-                    <phase>pre-integration-test</phase>
                     <goals>
                         <goal>up</goal>
-                    </goals>
-                </execution>
-
-                <!-- Stop Docker after integration tests -->
-                <execution>
-                    <id>docker-down</id>
-                    <phase>post-integration-test</phase>
-                    <goals>
                         <goal>down</goal>
                     </goals>
                 </execution>
             </executions>
+
+            
         </plugin>
+         -->
+
+        <plugin>
+                <groupId>com.dkanejs.maven.plugins</groupId>
+                <artifactId>docker-compose-maven-plugin</artifactId>
+                <version>4.0.0</version>
+                <executions>
+                    <execution>
+                        <id>up</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>up</goal>
+                        </goals>
+                        <configuration>
+                            <composeFile>${project.basedir}/src/main/docker/docker-compose.yml</composeFile>
+                            <detachedMode>true</detachedMode>
+                            <waitAfterUp>20</waitAfterUp> 
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>down</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>down</goal>
+                        </goals>
+                        <configuration>
+                            <composeFile>${project.basedir}/src/main/docker/docker-compose.yml</composeFile>
+                            <removeVolumes>true</removeVolumes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -186,10 +215,48 @@
                                 <it.server.host>${ejava-parent.docker.hostname}</it.server.host>
                             </systemPropertyVariables>
                         </configuration>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
                     </execution>
+                    <execution>
+                        <id>verify</id>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                    </execution> 
                 </executions>
             </plugin>
 
         </plugins>
     </build>
+
+    <profiles>
+         <profile>
+        <!-- build is running within Docker based CI/CD via root level docker-compose.yml-->
+            <id>wormhole-build</id>
+            <activation>
+                <property>
+                    <name>env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- this hostname is mapped to "host-gateway", used by testcontainers, but generically usable -->
+                <ejava-parent.docker.hostname>${env.TESTCONTAINERS_HOST_OVERRIDE}</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+        <profile>
+            <!-- build is running outside of Docker/root-level docker-compose.yml -->
+            <id>native-build</id>
+            <activation>
+                <property>
+                    <name>!env.TESTCONTAINERS_HOST_OVERRIDE</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- localhost outside of Docker CI/CD -->
+                <ejava-parent.docker.hostname>localhost</ejava-parent.docker.hostname>
+            </properties>
+        </profile>
+    </profiles>
 </project>

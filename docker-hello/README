@@ -16,5 +16,10 @@ Show the value: Simply type the variable name to display it in the console.
 
 $env:TESTCONTAINERS_HOST_OVERRIDE
 
+
+# Remove from current session
+Remove-Item Env:TESTCONTAINERS_HOST_OVERRIDE
+
+
 [Search Link] {https://www.google.com/search?q=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&sca_esv=b81e1b9584c528ab&biw=1358&bih=610&sxsrf=ANbL-n5VgTiHiQ9c4RU5gETkReHj-OR6GQ%3A1776406121479&ei=ac7haZfnHJ2V4-EP3t2-qAE&ved=0ahUKEwjXv-O-nPSTAxWdyjgGHd6uDxUQ4dUDCBE&uact=5&oq=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&gs_lp=Egxnd3Mtd2l6LXNlcnAiWkkgd2FudCB0byBzZXQgYW5kIHNob3cgdmFsdWUgb2YgaG9zdC5kb2NrZXIuaW50ZXJuYWwgdG8gJGVudjpURVNUQ09OVEFJTkVSU19IT1NUX09WRVJSSURFPUgAUABYAHAAeAGQAQCYAQCgAQCqAQC4AQPIAQD4AQGYAgCgAgCYAwCSBwCgBwCyBwC4BwDCBwDIBwCACAA&sclient=gws-wiz-serp}
  

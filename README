@@ -1,0 +1,146 @@
+# The project provides a demonstartion of implementing a simple docker integration test
+There are 2 pom files we have used - 
+1. "pom-self.xml"  is used as standalone and 
+2. "pom-parent.cml" is inheriting from ots ejava-build-parent pom.xml file
+
+We have modofied the pom-parent.xml as required to accomplish the goal. The original file in the 
+Gitlab repository was not enough to accomplish all the task describe un the chapter Docker Integration test
+
+Make the test in the CI/CD environment you need to add the environment variable from windows powershell as follows - 
+
+Set the value: Use the $env: prefix with the assignment operator.
+
+$env:TESTCONTAINERS_HOST_OVERRIDE = "host.docker.internal"
+
+Show the value: Simply type the variable name to display it in the console.
+
+$env:TESTCONTAINERS_HOST_OVERRIDE
+
+
+# Remove from current session
+Remove-Item Env:TESTCONTAINERS_HOST_OVERRIDE
+
+
+[Search Link] {https://www.google.com/search?q=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&sca_esv=b81e1b9584c528ab&biw=1358&bih=610&sxsrf=ANbL-n5VgTiHiQ9c4RU5gETkReHj-OR6GQ%3A1776406121479&ei=ac7haZfnHJ2V4-EP3t2-qAE&ved=0ahUKEwjXv-O-nPSTAxWdyjgGHd6uDxUQ4dUDCBE&uact=5&oq=I+want+to+set+and+show+value+of+host.docker.internal+to+%24env%3ATESTCONTAINERS_HOST_OVERRIDE%3D&gs_lp=Egxnd3Mtd2l6LXNlcnAiWkkgd2FudCB0byBzZXQgYW5kIHNob3cgdmFsdWUgb2YgaG9zdC5kb2NrZXIuaW50ZXJuYWwgdG8gJGVudjpURVNUQ09OVEFJTkVSU19IT1NUX09WRVJSSURFPUgAUABYAHAAeAGQAQCYAQCgAQCqAQC4AQPIAQD4AQGYAgCgAgCYAwCSBwCgBwCyBwC4BwDCBwDIBwCACAA&sclient=gws-wiz-serp}
+
+
+io.brachu:docker-compose-maven-plugin:1.0.0:up (default) on project dockercompose-it: Docker-compose cluster failed to start: Unexpected exception while waiting for cluster to be healthy. Status 404: 404 page not found
+
+That Status 404: 404 page not found error from the io.brachu:docker-compose-maven-plugin usually isn't about your application code. Instead, it’s a communication breakdown between the Maven plugin and the Docker Desktop API.
+
+Specifically, the plugin is trying to ask Docker, "Is the container healthy yet?" but it’s sending that request to an endpoint that Docker Desktop no longer supports or has moved.
+
+Why this is happening
+The io.brachu plugin (version 1.0.0) is a few years old. Recent updates to Docker Desktop (especially versions 4.x and the move toward Docker Compose V2) changed how the internal API handles requests.
+
+When the plugin reaches out to the Docker socket to check the "cluster health," Docker returns a 404 because the specific URL path the plugin is using is deprecated or disabled in your current Docker Desktop settings.
+
+How to Fix It
+1. Enable "Docker V1" Compatibility (Quickest Fix)
+Docker Desktop has a setting to ensure older tools can still talk to it.
+
+Open Docker Desktop Settings.
+
+Go to General.
+
+Ensure "Use Docker Compose V2" is checked (counter-intuitively, some older plugins work better with the V2 alias enabled), BUT if it's already checked, try unchecking it to see if the plugin is strictly looking for the V1 binary.
+
+Crucial: Go to Advanced and ensure "Expose daemon on tcp://localhost:2375 without TLS" is enabled. (The Brachu plugin often relies on this socket connection).
+
+2. Relax the Health Check in the POM
+The error happens because the plugin is "waiting for cluster to be healthy." You can tell the plugin to be less strict.
+In your pom.xml, inside the <configuration> for docker-compose-maven-plugin, add:
+
+XML
+<configuration>
+    <waitActive>false</waitActive> 
+    </configuration>
+3. Switch to the "Standard" Plugin
+The io.brachu plugin is quite niche. Most Java developers doing integration tests with Docker have moved to the fabric8 Docker Maven Plugin or Testcontainers.
+
+If you want to stick to a "Compose-first" Maven approach, the dkanejs:docker-compose-maven-plugin is more frequently updated and handles modern Docker Desktop API changes better.
+
+Quick Diagnostic
+To prove if it's a "Wait/Health" issue:
+
+Run docker-compose up manually in your console.
+
+While it's running, run your Maven build: mvn verify -P it.
+
+If it works, the issue is definitely the plugin's internal "wait" logic failing to talk to the Docker API.
+
+Are you tied to the Brachu plugin for a specific reason, or would you be open to a more modern pom.xml configuration for managing your Docker lifecycle?
+
+yes
+
+Moving away from the older io.brachu plugin to a more modern setup will save you a lot of headache with Docker Desktop's evolving API. The industry standard for "pure" Maven-to-Compose integration is now the dkanejs plugin or the fabric8 suite.
+
+Here is a modern, robust configuration for your it profile using the dkanejs plugin. It handles the "wait for health" check much more reliably and plays nicely with Docker Compose V2.
+
+Optimized it Profile for Docker Compose
+XML
+<profile>
+    <id>it</id>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.dkanejs.maven.plugins</groupId>
+                <artifactId>docker-compose-maven-plugin</artifactId>
+                <version>4.0.0</version>
+                <executions>
+                    <execution>
+                        <id>up</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>up</goal>
+                        </goals>
+                        <configuration>
+                            <composeFile>${basedir}/docker-compose.yml</composeFile>
+                            <detachedMode>true</detachedMode>
+                            <waitAfterUp>10</waitAfterUp> 
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>down</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>down</goal>
+                        </goals>
+                        <configuration>
+                            <composeFile>${basedir}/docker-compose.yml</composeFile>
+                            <removeVolumes>true</removeVolumes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</profile>
+Why this fixes your 404 error:
+Compose V2 Native: The dkanejs plugin (version 4.0.0+) is built to call the docker compose command directly on your machine rather than trying to hit internal, deprecated Docker API endpoints.
+
+Wait Logic: Instead of relying on a "Cluster Health" status (which is where your 404 was coming from), this uses waitAfterUp. This simply pauses the build for 10 seconds to let Postgres finish its internal "ready for connections" routine.
+
+Clean State: By setting <removeVolumes>true</removeVolumes>, every time you run your integration tests, you start with a fresh database. This prevents "data pollution" from previous runs.
+
+One Final "Pro" Tip for Postgres
+Postgres often reports as "Started" in Docker, but it takes 3–5 seconds to actually initialize its internal database files and listen for connections.
+
+If your Java tests still fail with "Connection Refused," increase the <waitAfterUp> value to 15 or 20. This is the "brute force" but highly effective way to ensure the DB is truly ready before the first Java test tries to connect.
+
+Does this look like it fits your project structure, or do you have multiple docker-compose files (e.g., one for infra, one for the app) that we need to coordinate?
+ 

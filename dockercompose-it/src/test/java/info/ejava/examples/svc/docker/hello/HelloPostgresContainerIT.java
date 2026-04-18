@@ -25,8 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @SpringBootTest(classes = {DockerComposeHelloApp.class,ClientTestConfiguration.class},
                 webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 // uncomment cntainerdb-dev when running against a fixed instance
-@ActiveProfiles({"test","containerdb"/*,"containerdb-dev"*/})
-//@ActiveProfiles({"test","containerdb","containerdb-dev"})
+//@ActiveProfiles({"test","containerdb"/*,"containerdb-dev"*/})
+@ActiveProfiles({"test","containerdb","containerdb-dev"})
 @Slf4j
 public class HelloPostgresContainerIT {
     
