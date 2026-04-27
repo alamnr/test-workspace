@@ -1,0 +1,7 @@
+services:
+  api:
+    build: #set build context to module root so that target/*bootexec.jar is within view
+      context: ../../..
+      dockerfile: src/main/docker/Dockerfile
+    ports:
+      - "8080"   #API port exposed on random host port

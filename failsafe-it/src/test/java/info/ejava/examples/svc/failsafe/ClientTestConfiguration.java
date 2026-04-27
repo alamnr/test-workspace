@@ -1,8 +1,7 @@
 package info.ejava.examples.svc.failsafe;
 
-import info.ejava.examples.common.web.RestTemplateLoggingFilter;
-import info.ejava.examples.common.web.ServerConfig;
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -16,11 +15,10 @@ import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import info.ejava.examples.common.web.RestTemplateLoggingFilter;
+import info.ejava.examples.common.web.ServerConfig;
+import lombok.extern.slf4j.Slf4j;
 
-/**
- * A test configuration used by remote IT test clients.
- */
 @SpringBootConfiguration(proxyBeanMethods = false)
 @EnableAutoConfiguration
 @Slf4j

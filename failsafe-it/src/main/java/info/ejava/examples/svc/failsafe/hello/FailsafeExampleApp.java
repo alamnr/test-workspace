@@ -1,6 +1,5 @@
 package info.ejava.examples.svc.failsafe.hello;
 
-import info.ejava.examples.common.web.WebLoggingFilter;
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
 import org.apache.tomcat.util.descriptor.web.SecurityCollection;
@@ -16,24 +15,26 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
+import org.springframework.http.HttpMethod;
+import info.ejava.examples.common.web.WebLoggingFilter;
 import jakarta.servlet.Filter;
 
 @SpringBootApplication
 public class FailsafeExampleApp {
+    
+    public static void main(String[] args) {
+        SpringApplication.run(FailsafeExampleApp.class, args);
+    }
 
-	public static void main(String[] args) {
-		SpringApplication.run(FailsafeExampleApp.class, args);
-	}
+    @Bean 
+    public Filter logFilter() {
+        return WebLoggingFilter.logFilter();
+    }
 
-	@Bean
-	public Filter logFilter() {
-		return WebLoggingFilter.logFilter();
-	}
-
-	@Bean
-	@Order(0)
-	public SecurityFilterChain baseSecurityFilterChain(HttpSecurity http) throws Exception {
-		http.securityMatchers(cfg->cfg.requestMatchers("/api/anonymous/**", "/api/authn/**"));
+    @Bean
+    @Order(0)
+    public SecurityFilterChain baseSecurityFilterChain(HttpSecurity http) throws Exception {
+    http.securityMatchers(cfg->cfg.requestMatchers("/api/anonymous/**", "/api/authn/**"));
 		http.authorizeHttpRequests(cfg->cfg.requestMatchers("/api/authn/**").authenticated());
 		http.authorizeHttpRequests(cfg->cfg.anyRequest().permitAll());
 
@@ -41,9 +42,9 @@ public class FailsafeExampleApp {
 		http.csrf(cfg->cfg.disable());
 		http.sessionManagement(cfg->cfg.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 		return http.build();
-	}
+    }
 
-	/**
+    /**
 	 * The following set of re-direct snippets are from
 	 * http://zetcode.com/springboot/https/[Spring Boot HTTPS example]
 	 */

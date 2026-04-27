@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:12.3-alpine
+    environment:
+      POSTGRES_PASSWORD: secret
+  mongodb:
+    image: mongo:4.4.0-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+  api:
+    image: testcontainers-ntest-example:latest
+    ports:
+      - "${HOST_API_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+      - mongodb
+    environment:
+      - DATABASE_URL=postgres://postgres:secret@postgres:5432/postgres
+      - MONGODB_URI=mongodb://admin:secret@mongodb:27017/testcontainers?authSource=admin

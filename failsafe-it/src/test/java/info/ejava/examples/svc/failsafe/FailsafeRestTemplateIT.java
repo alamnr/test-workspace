@@ -1,6 +1,8 @@
 package info.ejava.examples.svc.failsafe;
 
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+
+import org.assertj.core.api.BDDAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 
-import static org.assertj.core.api.BDDAssertions.then;
-
-@SpringBootTest(classes=ClientTestConfiguration.class,
-        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(classes = ClientTestConfiguration.class,
+                webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Slf4j
 public class FailsafeRestTemplateIT {
     @Autowired
@@ -37,7 +37,7 @@ public class FailsafeRestTemplateIT {
         ResponseEntity<String> response = authnUser.getForEntity(url, String.class);
 
         //then expected results returned
-        then(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        then(response.getBody()).isEqualTo("hello, jim");
+        BDDAssertions.then(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        BDDAssertions.then(response.getBody()).isEqualTo("hello, jim");
     }
 }

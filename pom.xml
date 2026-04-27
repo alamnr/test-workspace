@@ -19,11 +19,13 @@
     </description>
     <modules>
         <module>failsafe-it-example</module>
+        <module>failsafe-it</module>
         <module>failsafe-https-example</module>
 
         <module>dockercompose-it-example</module>
         <module>dockercompose-it</module>
         <module>testcontainers-ntest-example</module>
+        <module>testcontainers-ntest</module>
         <module>jpa-hibernate-example</module>
         <module>jpa-hibernate-spring-example</module>
         <module>jpa-song-example</module>
@@ -41,10 +43,12 @@
           <modules>
               <!-- Docker and IT with docker -->
               <module>docker-hello-example</module>
+              <module>docker-hello</module>
 
             <!-- for testing the API with DBs -->
               <!-- Docker Compose and IT with docker compose -->
               <module>dockercompose-it-example</module>
+              <module>dockercompose-it</module>
 
               <!-- TestContainers -->
               <!-- <module>testcontainers-ntest-example</module> -->
