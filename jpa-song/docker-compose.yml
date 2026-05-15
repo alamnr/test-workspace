@@ -1,0 +1,7 @@
+services:
+  postgres:
+    image:  postgres:12.3-alpine
+    environment: 
+      POSTGRES_PASSWORD:  secret
+    ports:
+      -  "5432"

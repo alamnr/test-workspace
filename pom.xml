@@ -29,6 +29,7 @@
         <module>jpa-hibernate-example</module>
         <module>jpa-hibernate-spring-example</module>
         <module>jpa-song-example</module>
+        <module>jpa-song</module>
         <module>authn-config-example</module>
     </modules>
 
