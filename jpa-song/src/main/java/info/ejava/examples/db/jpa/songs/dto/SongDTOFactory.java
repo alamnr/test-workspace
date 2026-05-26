@@ -61,7 +61,9 @@ public class SongDTOFactory {
     public SongsListDTOFactory listBuilder() { return new SongsListDTOFactory(); }
 
     public class SongsListDTOFactory {
+
         public final List<SongDTO> songs(int min, int max, UnaryOperator<SongDTO> ... visitors) {
+            //System.out.println("==================  min = "+min+"==== max - "+ faker.number().numberBetween(min, max));
             return IntStream.range(min,faker.number().numberBetween(min, max))
                             .mapToObj(i->SongDTOFactory.this.make(visitors))
                             .collect(Collectors.toList());

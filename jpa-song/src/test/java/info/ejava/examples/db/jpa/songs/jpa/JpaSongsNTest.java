@@ -179,7 +179,7 @@ public class JpaSongsNTest {
 
     @Test
     //@Transactional
-    void delete_does_not_exists_removing_detached_entity() {
+    void delete_does_not_exists_removing_detached_entity_without_Reansactional_annotation() {
         //given a persisted instance
         Song song = mapper.map(dtoFactory.make());
 

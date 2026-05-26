@@ -25,8 +25,11 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "REPOSONGS_SONG")
-@NamedQuery(name="Song.deleteSong",
-        query="delete from Song s where s.id=:id")
+@NamedQuery(name="Song.deleteSong", query="delete from Song s where s.id=:id")
+
+@NamedQuery(name="Song.findByArtistGESize", query="select s from Song s where length(s.artist) >= :length")
+
+@NamedQuery(name="Song.songs", query="select s from Song s")
 
 @SequenceGenerator(name = "REPOSONGS_SONG_SEQUENCE", allocationSize = 50)
 public class Song {
