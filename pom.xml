@@ -30,6 +30,7 @@
         <module>jpa-hibernate-spring-example</module>
         <module>jpa-song-example</module>
         <module>jpa-song</module>
+        <module>mongo-book-example</module>
         <module>authn-config-example</module>
     </modules>
 

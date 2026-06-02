@@ -3,7 +3,7 @@
 
     <groupId>info.ejava.examples.build</groupId>
     <artifactId>ejava-build-parent</artifactId>
-    <version>6.1.1-SNAPSHOT</version>
+    <version>6.1.0</version>
     <packaging>pom</packaging>
 
     <name>EJava Build::Parent</name>
@@ -13,49 +13,47 @@
     </description>
 
     <properties>
-        <ejava.version>6.1.1-SNAPSHOT</ejava.version>
-        <springboot.version>3.5.5</springboot.version>
-        <maven.min.version>3.6.3</maven.min.version>
+        <ejava.version>6.1.0</ejava.version>
+        <springboot.version>3.3.2</springboot.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.target.version>21</java.target.version>
+        <java.source.version>17</java.source.version>
+        <java.target.version>17</java.target.version>
         <spring-boot.attach>false</spring-boot.attach>
         <spring-boot.classifier>bootexec</spring-boot.classifier>
 
         <!-- maven plugins: http://maven.apache.org/plugins/index.html -->
         <!-- core plugins -->
-        <maven-clean-plugin.version>3.4.1</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-        <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>
-        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-        <maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-        <maven-help-plugin.version>3.5.1</maven-help-plugin.version>
-        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.7.1</maven-dependency-plugin.version>
+        <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
+        <maven-failsafe-plugin.version>3.3.1</maven-failsafe-plugin.version>
+        <maven-help-plugin.version>3.4.1</maven-help-plugin.version>
+        <maven-install-plugin.version>3.1.2</maven-install-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
+        <maven-site-plugin.version>3.12.1</maven-site-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
+        <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
         <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
         <maven-verifier-plugin.version>1.1</maven-verifier-plugin.version>
 
         <!-- tools plugins -->
-        <asciidoctor-maven-plugin.version>3.1.1</asciidoctor-maven-plugin.version>
         <assertj-assertions-generator.version>2.2.0</assertj-assertions-generator.version>
-        <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
+        <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
         <docker-compose-maven-plugin.version>1.0.0</docker-compose-maven-plugin.version>
         <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
         <docker-maven-plugin.version>0.44.0</docker-maven-plugin.version>
-        <flatten-maven-plugin.version>1.7.0</flatten-maven-plugin.version>
-        <gmavenplus-plugin.version>4.1.1</gmavenplus-plugin.version>
+        <flatten-maven-plugin.version>1.6.0</flatten-maven-plugin.version>
+        <gmavenplus-plugin.version>1.12.1</gmavenplus-plugin.version>
         <heroku-maven-plugin.version>3.0.4</heroku-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
-        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-        <maven-surefire-report-plugin.version>3.5.2</maven-surefire-report-plugin.version>
+        <maven-javadoc-plugin.version>3.8.0</maven-javadoc-plugin.version>
+        <maven-surefire-report-plugin.version>3.3.1</maven-surefire-report-plugin.version>
         <openapi-generator-maven-plugin.version>7.8.0</openapi-generator-maven-plugin.version>
 
         <!-- other plugins -->
@@ -64,7 +62,7 @@
     <repositories>
         <repository>
             <id>ejava-nexus-releases</id>
-            <url>https://pika.cs.ep.jhu.edu/nexus/repository/ejava-releases</url>
+            <url>https://pika.jhuep.com/nexus/repository/ejava-releases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -74,7 +72,7 @@
         </repository>
         <repository>
             <id>ejava-nexus-snapshots</id>
-            <url>https://pika.cs.ep.jhu.edu/nexus/repository/ejava-snapshots</url>
+            <url>https://pika.jhuep.com/nexus/repository/ejava-snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -111,34 +109,12 @@
                         <release>${java.target.version}</release>
                         <!-- add metadata to method parameters -->
                         <parameters>true</parameters>
-                        <!-- must be explicitly set with newer JDKs to work with lombok -->
-                        <proc>full</proc>
                     </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>enforce-versions</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <requiredMavenVersion>
-                                        <version>${maven.min.version}</version>
-                                    </requiredMavenVersion>
-                                </rules>
-                            </configuration>
-                        </execution>
-                    </executions>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -200,14 +176,6 @@
                         <skip>true</skip>
                         <skipDeploy>true</skipDeploy>
                     </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.asciidoctor</groupId>
-                            <artifactId>asciidoctor-converter-doxia-module</artifactId>
-                            <version>${asciidoctor-maven-plugin.version}</version>
-                        </dependency>
-                    </dependencies>
-
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -351,57 +319,6 @@
 
     <profiles>
         <profile>
-            <!-- This profile will add mockito-core as an approved javaagent to eliminate the following warning:
-
-                -javaagent:${org.mockito:mockito-core:jar}
-                Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work
-                in future releases of the JDK. Please add Mockito as an agent to your build ...
-                https://github.com/mockito/mockito/issues/3037#issuecomment-2379470509
-
-                -Xshare:off
-                Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader
-                classes because bootstrap classpath has been appended
-            -->
-            <id>test</id>
-            <activation>
-                <file>
-                    <exists>${basedir}/src/test/java</exists>
-                </file>
-            </activation>
-            <properties>
-                <!-- alternate approach without dependency plugin
-                <mockito.version>5.14.2</mockito.version>
-                <mockito.junit.argLine>-javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar</mockito.junit.argLine>
-                -->
-                <argLine/> <!-- default empty value -->
-                <mockito.junit.argLine>-javaagent:${org.mockito:mockito-core:jar} -Xshare:off</mockito.junit.argLine>
-            </properties>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals> <!-- added to get mockito definition for surefire agent -->
-                                    <goal>properties</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${maven-surefire-plugin.version}</version>
-                        <configuration>
-                            <argLine>@{argLine} ${mockito.junit.argLine}</argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
             <id>it</id>
             <activation>
                 <file>
@@ -428,7 +345,6 @@
                                     <configuration>
                                         <portNames>
                                             <portName>server.http.port</portName>
-                                            <portName>server.jmx.port</portName>
                                         </portNames>
                                     </configuration>
                                 </execution>
@@ -447,7 +363,6 @@
                                     </goals>
                                     <configuration>
                                         <skip>${spring-boot.run.skip}</skip>
-                                        <jmxPort>${server.jmx.port}</jmxPort> <!-- use unique port -->
                                         <arguments>
                                             <argument>--server.port=${server.http.port}</argument>
                                         </arguments>
@@ -547,12 +462,6 @@
         </profile>
 
         <!--
-
-
-
-
-
-        
             This profile will turn off spring-boot-maven-plugin start/stop of the Spring Boot
             executable JAR and will enable basic settings to build, start, and stop a single
             image defined be a specific Dockerfile as part of a Maven integration test.
