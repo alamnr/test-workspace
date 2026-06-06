@@ -44,12 +44,12 @@ public class MongoOpsBooksNTest {
     private BooksMapper mapper;
     @Autowired
     private MongoClient mongoClient;
-    @Value("${spring.mongodb.uri:embedded}")
+    @Value("${spring.data.mongodb.uri:embedded}")
     private String mongoUrl;
 
-     @BeforeEach
+    @BeforeEach
     void setUp() {
-        log.info("dbUrl={}", mongoUrl);
+        log.info(" ########################################## dbUrl={}", mongoUrl);
     }
     @BeforeEach
     @AfterEach

@@ -3,7 +3,7 @@ package info.ejava.examples.db.mongo.books;
 import info.ejava.examples.db.mongo.books.bo.Book;
 import info.ejava.examples.db.mongo.books.dto.BookDTO;
 import info.ejava.examples.db.mongo.books.dto.BookDTOFactory;
-
+import info.ejava.examples.db.mongo.books.repo.BooksRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @SpringBootApplication
 //@org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 //@EnableMongoRepositories(basePackageClasses = {BooksRepository.class})
-//@EnableMongoRepositories(basePackageClasses = {BooksRepository.class}, repositoryImplementationPostfix = "Impl")
+@EnableMongoRepositories(basePackageClasses = {BooksRepository.class}, repositoryImplementationPostfix = "Impl")
 @Slf4j
 public class MongoDBBooksApp {
     public static void main(String[] args) {
@@ -46,8 +46,8 @@ public class MongoDBBooksApp {
     //     @Override
     //     public void run(String... args) throws Exception {
     //         List<BookDTO> dtos = dtoFactory.listBuilder().books(100,100);
-    //         List<Book> songBOs = dtos.stream().map(dto->mapper.map(dto)).toList();
-    //         booksRepository.saveAll(songBOs);
+    //         List<Book> bookBOs = dtos.stream().map(dto->mapper.map(dto)).toList();
+    //         booksRepository.saveAll(bookBOs);
 
     //         long count = mongoTemplate.count(new Query(), Book.class);
     //         log.info("we have {} books", count);
